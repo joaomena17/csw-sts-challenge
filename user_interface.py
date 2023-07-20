@@ -1,11 +1,7 @@
 import streamlit as st
 import requests as r
-<<<<<<< HEAD
 from streamlit_option_menu import option_menu
 from PIL import Image
-         
-def get_sensor_data_by_id(sensor_id):
-    r.get(f"http://localhost:5000/sensors/{sensor_id}")
 
 def main():
     #st.markdown("[!(csw.png)](www.criticalsoftware.com)")
@@ -22,9 +18,10 @@ def main():
     st.divider()
 
     with st.sidebar:
-        selected = option_menu("Smart Booking", ['Home', 'Search by ID', 'AI Chat', 'Book Now', ' Add Sensor'], 
+        selected = option_menu("Smart Booking", ['Home', 'Search by ID', 'AI Chat', 'Book Room', ' Add Sensor'], 
             icons=['house', 'search', 'chat', 'cloud-upload', 'plus'], menu_icon="book", default_index=0)
         selected
+        print(selected)
 
     # HOME
     if selected == 'Home':
@@ -64,9 +61,22 @@ def main():
         if office_input != "All" and building_input != "All":
             room_input = st.selectbox("Select room:", ["All","1","2","3"])
 
-        user_choice = [office_input, building_input, room_input]
         st.text("")
-        st.button("Search now")
+        search_button = st.button("Search now")
+        if search_button:
+            if office_input == "All":
+                response = r.get(f"http://localhost:5000/sensors/")
+                filter_data = response.json()
+            elif office_input != "All" and building_input == "All":
+                response = r.get(f"http://localhost:5000/sensors/{office_input}")
+                filter_data = response.json()
+            elif office_input != "All" and building_input != "All" and room_input == "All":
+                response = r.get(f"http://localhost:5000/sensors/{office_input}/{building_input}")
+                filter_data = response.json()
+            elif office_input != "All" and building_input != "All" and room_input != "All":
+                response = r.get(f"http://localhost:5000/sensors/{office_input}/{building_input}/{room_input}")
+                filter_data = response.json()
+            st.dataframe(filter_data)
         st.markdown("***")
 
     # SEARCH BY ID
@@ -77,21 +87,47 @@ def main():
         sensor_id = st.text_input("Sensor ID", value="")
         id_search = st.button("Search now")
         if id_search:
-            sensor_data = get_sensor_data_by_id(sensor_id)
+            response = r.get(f"http://localhost:5000/sensors/{sensor_id}")
+            sensor_data = response.json()
+            st.dataframe(sensor_data)
         st.markdown("***")
 
     if selected == 'AI Chat':
         st.write("# WORK IN PROGRESS")
-    
 
+    if selected == 'Book Room':
+        st.write("### Book Room")
+        st.write("Select the room you want to book and check if it's available.")
+        st.text("")
+        book_office = st.radio("Office", ["Porto", "Coimbra", "Lisboa"])
+        if book_office == "Coimbra":
+            book_building = st.radio("Building", ["A", "B", "C"])
+        else:
+            book_building = "A"
+        book_room = st.radio("Room", ["Room1", "Room2", "Room3"])
+        st.button("Check Availability")
+        st.markdown("***")
+
+        # Pie Chart
+        # hyperlink to Pulsar
+    
+    if selected == ' Add Sensor':
+        st.write("### Add Sensor")
+        st.write("Fill the following fields to add a new sensor to the MQTT Broker.")
+        st.text("")
+        new_name = st.text_input("Sensor Name", value="")
+        new_office = st.text_input("Office Location", value="")
+        new_building = st.text_input("Building", value="")
+        new_room = st.text_input("Room", value="")
+        new_type = st.text_input("Sensor Type", value="")
+        new_unit = st.text_input("Measuring Unit", value="")
+        st.text("")
+
+        add_sensor = st.button("Add Sensor")
+        st.markdown("***")
+
+
+        # if add_sensor: POST
+        # if response == 200: green text saying new sensor added successfuly
 if __name__ == "__main__":
     main()
-=======
-
-def get_sensor_data(city, room):
-    response = r.get(f"http://localhost:5000/sensors/{city}/{room}")
-    data = response.json()
-    st.write(data)
-
-get_sensor_data("Porto", "Room 1")
->>>>>>> 1c88e7e509c0f0794edc8cd21fe6fd190a397437
