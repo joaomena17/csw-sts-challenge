@@ -40,19 +40,19 @@ def temperature_generator():
     return random.randint(600, 699)  # standard temperature
 
 def office_generator():
-    i = random.randint(1, 6)
+    i = random.randint(0, 5)
     cur_office = OFFICE_LIST[i]
     #print(cur_office)
     return cur_office
 
 def building_generator():
-    i = random.randint(1, 2)
+    i = random.randint(0,1)
     cur_building = BUILDING_LIST[i]
     #print(cur_building)
     return cur_building
 
 def room_and_occupants_generator(curr_office_occupants, curr_room_occupants):
-    i = random.randint(1, 4)
+    i = random.randint(0, 3)
     cur_room = ROOM_LIST[i]
     
     if (cur_room == "Building"):           
@@ -85,7 +85,7 @@ def change_temperature():
     client.publish("SummerCampSTS/+/+/+/sensores/temperatura",temp) ##? 
 
 # updates the event with a different occupants value
-def change_occupants():
+def change_occupants(office_occupants,room_occupants):
     office = office_generator()
     building = building_generator()
     result = room_and_occupants_generator(office_occupants,room_occupants)
@@ -114,11 +114,13 @@ def main():
     '''
     #train_event = start_event()
     status = True
-    change_occupants()
+    
     if status == 0:
         print("Exiting program due to post request error.\n")
         return 1
 
+    office_occupants=0
+    room_occupants=0
     # initialize timers
     
     temperature_init = time()
@@ -148,7 +150,7 @@ def main():
             temperature_timeout = interval_generator()
 
         if curr_time > occupants_init + (occupants_timeout):
-            train_event = change_occupants(train_event)
+            change_occupants(office_occupants,room_occupants)
             occupants_init = curr_time
             occupants_timeout = interval_generator()
         """
