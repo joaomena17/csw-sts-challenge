@@ -194,24 +194,16 @@ def main():
         #    occupants_timeout = interval_generator()
        
        # status = publish_event(train_event)
-        if status == 0:
-            print("Exiting program due to post request error.\n")
-            return 1
-        """
+      
 
    # status = publish_event(train_event)
-    """
-    if status == 0:
-        print("Exiting program due to post request error.\n")
-        return 1
-    """
+   
     # program ran correctly
     #print()
-    ''' return 0
+    # return 0
 
 
-if __name__ == '__main__':
-    main()
-    """
-    '''
+##    main()
+   
+   
    
