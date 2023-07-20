@@ -1,14 +1,10 @@
 import paho.mqtt.client as mqtt
 import sqlite3
-import logger
 
-client = mqtt.Client(client_id="cliente_1")
 
 # MQTT Broker Configuration
 broker_adress = "test.mosquitto.org" # Broker Adress  
 broker_port = 1883 # MQTT port
-
-client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
 
 #client.subscribe("SummerCampSTS/#", qos= 1) # Subscribes to a MQTT topic
 
@@ -17,30 +13,33 @@ client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Brok
 
 def on_connect(client, userdata, flags, rc): 
     print("Conectado ao broker com resultado de conexão: " + str(rc))
-    client.subscribe("SummerCampSTS/#", qos= 1) # Subscribes to a MQTT topic
+    client.subscribe("SummerCampSTS/#", qos=0) # Subscribes to a MQTT topic
 
-client.on_connect = on_connect
 
 def on_message(client, userdata, msg):
     print("Nova mensagem recebida no tópico: " + msg.topic)
     print("Conteúdo da mensagem: " + msg.payload.decode())
+    data = json.loads(msg.payload.decode())
     
     try:
         conn = sqlite3.connect("sensors.db", check_same_thread=False)
         cursor = conn.cursor()
 
-        #ver se a database existe, se nao existir criar/inserrir
-        #ver msg 
+        #através da msg topic, ir buscar o id associado aos vários campos
+        #depois ir à tabela dos sensor_values e inserir uma linha com:
+        # id anterior(sensor) | timestamp | value (conteudo da mensagem -> msg.payload.decode())
+
+        conn.commit()
+
+        #topic = msg.topic
+        #str = topic.split("/")
+        #print(str)
+
 
     finally:
         cursor.close()
         conn.close()
         
-    #insert database
-    
-
-client.on_message = on_message
-
 
 def initialize_db():
 
@@ -58,7 +57,7 @@ def initialize_db():
 
         if cursor.fetchone()[0] == 1:
 
-            logger.info("DB already exists, skipping initialization.")
+            print("DB already exists, skipping initialization.")
 
         else:
 
@@ -67,19 +66,12 @@ def initialize_db():
             cursor.execute("""
 
                 CREATE TABLE IF NOT EXISTS "sensors" (
-
                     "id" INTEGER PRIMARY KEY,
-
                     "name" TEXT COLLATE NOCASE,
-
                     "type" TEXT COLLATE NOCASE,
-
                     "office" TEXT COLLATE NOCASE,
-
                     "building" TEXT COLLATE NOCASE,
-
                     "room" TEXT COLLATE NOCASE,
-
                     "units" TEXT COLLATE NOCASE
 
                 )
@@ -89,11 +81,8 @@ def initialize_db():
             cursor.execute("""
 
               CREATE TABLE IF NOT EXISTS "sensor_values" (
-
                 "sensor" INTEGER,
-
                 "timestamp" TEXT,
-
                 "value" REAL
               )
 
@@ -108,3 +97,17 @@ def initialize_db():
         conn.close()
 
 initialize_db()
+
+client = mqtt.Client(client_id="cliente_1")
+
+client.on_connect = on_connect
+
+client.on_message = on_message
+
+result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
+
+print(result)
+
+client.loop_forever()
+
+
