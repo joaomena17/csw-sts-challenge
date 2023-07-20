@@ -9,7 +9,9 @@ from pytimedinput import timedInput
 
 
 #variables
-CURRENT_OFFICE_ID = 5467  # get real  ID?
+CURRENT_OFFICE = ("Lisboa", "Coimbra", "Tomar", "Viseu", "Porto", "Vila Real")
+CURRENT_BUILDING = ("Buiding1", "Building2")
+CURRENT_ROOM = ("Room1","Room2", "Room3")
 OFFICE_CAPACITY = 300
 ROOM_CAPACITY = 10
 
@@ -18,11 +20,11 @@ client = mqtt.Client(client_id="meu_cliente")
 
 #Sensor/publisher subscription
 client.subscribe("sensores/temperatura", qos=1) # 1: at least once
-client.subscribe("sensores/presenca", qos=1) # 1: at least once
+client.subscribe("SummerCampSTS/+/+/sensores/presenca", qos=1) # 1: at least once
 
 #Sensor unsubscription
-client.unsubscribe("sensores/temperatura") 
-client.unsubscribe("sensores/presenca") 
+#client.unsubscribe("sensores/temperatura") 
+#client.unsubscribe("sensores/presenca") 
 
 
 
