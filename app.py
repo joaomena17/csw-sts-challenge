@@ -65,7 +65,7 @@ def get_all_sensor():
         conn.commit()
         conn.close()
 
-        return jsonify({"message": "Sensor data successfully inserted."}), 201
+        return jsonify({"message": "Sensor data successfully inserted."}), 200
 
 
 #Get all sensors recent values from Office
@@ -86,12 +86,12 @@ def get_all_sensor_office(city):
     return jsonify(json_data)
 
 
-#Get all sensors recent values from Office and Room
-@app.route('/sensors/<string:city>/<string:room>', methods = ['GET'])
-def get_all_sensor_room(city, room):
+#Get all sensors recent values from Office and Building
+@app.route('/sensors/<string:city>/<string:building>', methods = ['GET'])
+def get_all_sensor_building(city, building):
     conn = sqlite3.connect('sensors.db', check_same_thread = False)
     cursor = conn.cursor()
-    cursor.execute(queries.query_by_room, (city, room))
+    cursor.execute(queries.query_by_building, (city, building))
     rows = cursor.fetchall()
     columns = [description[0] for description in cursor.description]
     conn.close()
@@ -100,10 +100,28 @@ def get_all_sensor_room(city, room):
     for row in rows:
         json_data.append(dict(zip(columns, row)))
 
-    print(json_data)
+    print(json_data)    
+
     return jsonify(json_data)
 
 
+#Get all sensors recent values from Office and Building
+@app.route('/sensors/<string:city>/<string:building>/<string:room>', methods = ['GET'])
+def get_all_sensor_room(city, building, room):
+    conn = sqlite3.connect('sensors.db', check_same_thread = False)
+    cursor = conn.cursor()
+    cursor.execute(queries.query_by_room, (city, building, room))
+    rows = cursor.fetchall()
+    columns = [description[0] for description in cursor.description]
+    conn.close()
+
+    json_data = []
+    for row in rows:
+        json_data.append(dict(zip(columns, row)))
+
+    print(json_data)      
+
+    return jsonify(json_data)
 
 if __name__ == '__main__':
     app.run(debug = True)
