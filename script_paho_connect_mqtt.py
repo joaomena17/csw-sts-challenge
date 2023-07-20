@@ -37,11 +37,31 @@ def on_message(client, userdata, msg):
             #depois ir à tabela dos sensor_values e inserir uma linha com:
             # id anterior(sensor) | timestamp | value (conteudo da mensagem -> msg.payload.decode())
 
-
             #TODO: se não existir na BD ignora !IMPORTANTE! 
-            cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
-                            VALUES ((select id from sensors where name = ?), ? , ?)""",
-                        (str[4], timestamp , value))
+
+            # Retrieve the id of the sensor
+
+            cursor.execute("""
+                           SELECT id
+                           FROM sensors
+                           WHERE name = ?""", (str[4],)
+                           )
+            
+            result = cursor.fetchone()
+            test = result[0]
+            
+            if result.length > 0:
+
+            #  cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
+            #                 VALUES ((select id from sensors where name = ?), ? , ?)""",
+            #            (str[4], timestamp , value))
+
+                  cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
+                                VALUES (?, ? , ?)""",
+                            (test, timestamp , value))
+              
+            else:
+                print("Sensor not found with name: ", str[4])
 
             conn.commit()
 
