@@ -19,15 +19,33 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print("Nova mensagem recebida no tópico: " + msg.topic)
     print("Conteúdo da mensagem: " + msg.payload.decode())
-
+    data = json.loads(msg.payload.decode())
     
     try:
         conn = sqlite3.connect("sensors.db", check_same_thread=False)
         cursor = conn.cursor()
 
-        topic = msg.payload.decode()
-        str = topic.split("/")
-        print(str)
+        # Insere a informação do sensor na tabela 'sensors' se o sensor ainda não estiver na tabela
+        cursor.execute("""
+            INSERT OR IGNORE INTO sensors (id, name, type, office, building, room, units)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (data['sensor_id'], data['sensor_name'], data['sensor_type'], data['office'], data['building'], data['room'], data['units']))
+
+ 
+
+        # Insere os valores do sensor na tabela 'sensor_values'
+        cursor.execute("""
+            INSERT INTO sensor_values (sensor, timestamp, value)
+            VALUES (?, ?, ?)
+        """, (data['sensor_id'], data['timestamp'], data['value']))
+
+ 
+
+        conn.commit()
+
+        #topic = msg.topic
+        #str = topic.split("/")
+        #print(str)
 
 
     finally:
