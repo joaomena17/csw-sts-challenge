@@ -86,12 +86,21 @@ def change_temperature():
 
 # updates the event with a different occupants value
 def change_occupants():
+    office = office_generator()
+    building = building_generator()
     result = room_and_occupants_generator(office_occupants,room_occupants)
     room = result[0] 
     office_occupants = result[1]
-    room_occupants = result[2]
+    room_occupants = result[2] 
+    
+    if (room == "Building"):
+        occupants = office_occupants
+    else:
+        occupants = room_occupants
    
+    print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), occupants)
     client.publish("sensores/presenca", office_occupants) 
+    client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), occupants)
     
 ########end Random values generator########
 
@@ -105,7 +114,7 @@ def main():
     '''
     #train_event = start_event()
     status = True
-    test_office = office_generator();
+    change_occupants()
     if status == 0:
         print("Exiting program due to post request error.\n")
         return 1
