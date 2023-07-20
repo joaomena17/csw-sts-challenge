@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import sqlite3
+from datetime import datetime 
 
 
 # MQTT Broker Configuration
@@ -19,21 +20,30 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print("Nova mensagem recebida no tópico: " + msg.topic)
     print("Conteúdo da mensagem: " + msg.payload.decode())
-    data = json.loads(msg.payload.decode())
-    
+
     try:
         conn = sqlite3.connect("sensors.db", check_same_thread=False)
         cursor = conn.cursor()
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        value = msg.payload.decode()
 
         #através da msg topic, ir buscar o id associado aos vários campos
-        #depois ir à tabela dos sensor_values e inserir uma linha com:
-        # id anterior(sensor) | timestamp | value (conteudo da mensagem -> msg.payload.decode())
+        topic = msg.topic
+        str = topic.split("/")
+        if len(str) == 6:
 
-        conn.commit()
+            #PLANO:
+            #através da msg topic, ir buscar o id associado aos vários campos
+            #depois ir à tabela dos sensor_values e inserir uma linha com:
+            # id anterior(sensor) | timestamp | value (conteudo da mensagem -> msg.payload.decode())
+        
+            cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
+                            VALUES ((select id from sensors where name = ?), ? , ?)""",
+                        (str[4], timestamp , value))
 
-        #topic = msg.topic
-        #str = topic.split("/")
-        #print(str)
+            conn.commit()
+
+        
 
 
     finally:
