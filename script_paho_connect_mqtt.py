@@ -26,7 +26,7 @@ def on_message(client, userdata, msg):
         cursor = conn.cursor()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         value = msg.payload.decode()
-
+    
         #através da msg topic, ir buscar o id associado aos vários campos
         topic = msg.topic
         str = topic.split("/")
@@ -43,9 +43,6 @@ def on_message(client, userdata, msg):
 
             conn.commit()
 
-        
-
-
     finally:
         cursor.close()
         conn.close()
@@ -54,13 +51,10 @@ def on_message(client, userdata, msg):
 def initialize_db():
 
     try:
-
         # Connect to SQLite database - this will create a new database file if it doesn't exist
 
         conn = sqlite3.connect("sensors.db", check_same_thread=False)
-
         cursor = conn.cursor()
-
         cursor.execute(""" SELECT count(name) FROM sqlite_master WHERE type='table' AND name='sensors' """)
 
         #if the count is 1, then table exists
@@ -70,9 +64,7 @@ def initialize_db():
             print("DB already exists, skipping initialization.")
 
         else:
-
             # Create tables
-
             cursor.execute("""
 
                 CREATE TABLE IF NOT EXISTS "sensors" (
@@ -83,28 +75,22 @@ def initialize_db():
                     "building" TEXT COLLATE NOCASE,
                     "room" TEXT COLLATE NOCASE,
                     "units" TEXT COLLATE NOCASE
-
                 )
-
             """)
 
             cursor.execute("""
-
               CREATE TABLE IF NOT EXISTS "sensor_values" (
                 "sensor" INTEGER,
                 "timestamp" TEXT,
                 "value" REAL
               )
-
             """)
 
             conn.commit()
-
     finally:
-
         cursor.close()
-
         conn.close()
+
 
 initialize_db()
 
