@@ -50,19 +50,19 @@ def on_message(client, userdata, msg):
             
             result = cursor.fetchone()
             test = result[0]
-            
+
             if result.length > 0:
 
             #  cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
             #                 VALUES ((select id from sensors where name = ?), ? , ?)""",
             #            (str[4], timestamp , value))
 
-                  cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
-                                VALUES (?, ? , ?)""",
-                            (test, timestamp , value))
+                cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
+                            VALUES (?, ? , ?)""",
+                        (test, timestamp , value))
               
             else:
-                print("Sensor not found with name: ", str[4])
+                print("Sensor: ", str[4]," not found")
 
             conn.commit()
 
