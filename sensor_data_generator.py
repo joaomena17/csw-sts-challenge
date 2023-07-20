@@ -16,9 +16,34 @@ ROOM_LIST = ["Room1","Room2", "Room3", "Building"]
 
 OFFICE_MAX_CAPACITY = 300
 ROOM_CAPACITY = 20
-status = True
+office_occupants=0
+room_occupants=0
+temperature_init = time()
+occupants_init = time()
 
-client = mqtt.Client(client_id="meu_cliente")
+
+# sets a cooldown interval between 1 and 6 minutes      #???
+def interval_generator():
+    return random.randint(60, 360)
+
+occupants_timeout = interval_generator()
+temperature_timeout = interval_generator()
+
+temperature_init = time()
+occupants_init = time() 
+#status = True
+curr_time = time()
+
+# MQTT Broker Configuration
+broker_adress = "test.mosquitto.org" # Broker Adress  
+broker_port = 1883 # MQTT port
+
+
+client = mqtt.Client(client_id="cliente_1")
+
+result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
+
+print(result)
 
 #Sensor/publisher subscription
 client.subscribe("sensores/temperatura", qos=1) # 1: at least once
@@ -27,8 +52,6 @@ client.subscribe("sensores/presenca", qos=1) # 1: at least once
 #Sensor unsubscription
 #client.unsubscribe("sensores/temperatura") 
 #client.unsubscribe("sensores/presenca") 
-
-
 
 ######## Random values generator ########
 def temperature_generator():
@@ -68,17 +91,6 @@ def room_temp_generator() :
     cur_room = ROOM_LIST[i]
     
     return cur_room
-"""
-def occupants_generator(curr_occupants):
-    if curr_occupants < OFFICE_MAX_CAPACITY:
-        return curr_occupants + random.randint(1, min(10, OFFICE_MAX_CAPACITY - curr_occupants))
-    return curr_occupants
-"""
-
-# sets a cooldown interval between 1 and 6 minutes      #???
-def interval_generator():
-    return random.randint(60, 360)
-
 
 # updates the event with a different temperature value
 def change_temperature():
@@ -111,9 +123,26 @@ def change_occupants(office_occupants,room_occupants):
     print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(office,building,room), occupants)
     #client.publish("sensores/presenca", office_occupants) 
     client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), occupants)
+
+def publisher():   
+    if curr_time > temperature_init + (temperature_timeout):
+        change_temperature()
+        temperature_init = curr_time
+        temperature_timeout = interval_generator()
+
+    if curr_time > occupants_init + (occupants_timeout):
+        change_occupants(office_occupants,room_occupants)
+        occupants_init = curr_time
+        occupants_timeout = interval_generator()
+        
+client.publisher = publisher
+       
+client.loop_forever()   
     
 ########end Random values generator########
 
+
+"""
 def main():
     '''
     # start trip
@@ -132,7 +161,7 @@ def main():
     office_occupants=0
     room_occupants=0
     # initialize timers
-    change_occupants(office_occupants,room_occupants)
+    #change_occupants(office_occupants,room_occupants)
     #change_temperature()
     temperature_init = time()
     occupants_init = time()
@@ -147,22 +176,23 @@ def main():
     while status is True:
         # save current time and check all timers
         curr_time = time()
-        
+               
         """
-        print(    
-            f"temperature: {int(temperature_init + (temperature_timeout) - curr_time)}\n"
-            f"passenger: {int(occupants_init + (occupants_timeout) - curr_time)}\n")     
-        """
-        if curr_time > temperature_init + (temperature_timeout):
-            change_temperature()
-            temperature_init = curr_time
-            temperature_timeout = interval_generator()
-
-        if curr_time > occupants_init + (occupants_timeout):
-            change_occupants(office_occupants,room_occupants)
-            occupants_init = curr_time
-            occupants_timeout = interval_generator()
-        """
+       
+        #print(    
+        #    f"temperature: {int(temperature_init + (temperature_timeout) - curr_time)}\n"
+        #    f"passenger: {int(occupants_init + (occupants_timeout) - curr_time)}\n")     
+        #"""
+        #if curr_time > temperature_init + (temperature_timeout):
+        #    change_temperature()
+        #    temperature_init = curr_time
+        #    temperature_timeout = interval_generator()
+#
+        #if curr_time > occupants_init + (occupants_timeout):
+        #    change_occupants(office_occupants,room_occupants)
+        #    occupants_init = curr_time
+        #    occupants_timeout = interval_generator()
+       
        # status = publish_event(train_event)
         if status == 0:
             print("Exiting program due to post request error.\n")
@@ -177,8 +207,11 @@ def main():
     """
     # program ran correctly
     #print()
-    return 0
+    ''' return 0
 
 
 if __name__ == '__main__':
     main()
+    """
+    '''
+   

@@ -22,6 +22,7 @@ def on_message(client, userdata, msg):
     print("Conteúdo da mensagem: " + msg.payload.decode())
 
     try:
+        
         conn = sqlite3.connect("sensors.db", check_same_thread=False)
         cursor = conn.cursor()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
