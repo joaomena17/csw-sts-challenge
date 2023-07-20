@@ -1,5 +1,7 @@
 import streamlit as st
+import requests as r
+         
+def get_sensor_data(sensor_id):
+    r.get("http://localhost:5000", sensor_id)
 
-st.write("""
-# STS Challenge - IoT Project
-# """)
+get_sensor_data(1234)
