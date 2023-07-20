@@ -22,22 +22,51 @@ def get_sensor(sensor_id):
     print(json_data)
     return jsonify(json_data)
 
+
 #Get all sensors recent values 
-@app.route('/sensors/', methods = ['GET'])
+@app.route('/sensors', methods = ['GET', 'POST'])
 def get_all_sensor():
-    conn = sqlite3.connect('sensors.db', check_same_thread = False)
-    cursor = conn.cursor()
-    cursor.execute(queries.query_all_sensors)
-    rows = cursor.fetchall()
-    columns = [description[0] for description in cursor.description]
-    conn.close()
+    if request.method == 'GET':
+        conn = sqlite3.connect('sensors.db', check_same_thread = False)
+        cursor = conn.cursor()
+        cursor.execute(queries.query_all_sensors)
+        rows = cursor.fetchall()
+        columns = [description[0] for description in cursor.description]
+        conn.close()
 
-    json_data = []
-    for row in rows:
-        json_data.append(dict(zip(columns, row)))
+        json_data = []
+        for row in rows:
+            json_data.append(dict(zip(columns, row)))
 
-    print(json_data)
-    return jsonify(json_data)
+        print(json_data)
+        return jsonify(json_data)
+    elif request.method == 'POST':
+        
+        data = request.get_json()
+        
+        conn = sqlite3.connect('sensors.db', check_same_thread = False)
+        cursor = conn.cursor()
+
+        sensor_name = data['name']
+        sensor_type = data['type']
+        sensor_office = data['office']
+        sensor_building = data['building']
+        sensor_room = data['room']
+        sensor_units = data['units']
+
+        #handle if exest sensore with the same name:
+        cursor.execute("SELECT * FROM sensors WHERE name = ?", (sensor_name,))
+        rows = cursor.fetchall()
+        if(len(rows) != 0):
+            return jsonify({"message": "Exist sensor with the same name"}), 409 
+        
+
+        cursor.execute(queries.query_insert_sensor, (sensor_name, sensor_type, sensor_office, sensor_building, sensor_room, sensor_units))
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message": "Sensor data successfully inserted."}), 201
+
 
 #Get all sensors recent values from Office
 @app.route('/sensors/<string:city>', methods = ['GET'])
@@ -56,6 +85,7 @@ def get_all_sensor_office(city):
     print(json_data)
     return jsonify(json_data)
 
+
 #Get all sensors recent values from Office and Room
 @app.route('/sensors/<string:city>/<string:room>', methods = ['GET'])
 def get_all_sensor_room(city, room):
@@ -72,6 +102,7 @@ def get_all_sensor_room(city, room):
 
     print(json_data)
     return jsonify(json_data)
+
 
 
 if __name__ == '__main__':
