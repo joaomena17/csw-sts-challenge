@@ -37,7 +37,9 @@ def on_message(client, userdata, msg):
             #através da msg topic, ir buscar o id associado aos vários campos
             #depois ir à tabela dos sensor_values e inserir uma linha com:
             # id anterior(sensor) | timestamp | value (conteudo da mensagem -> msg.payload.decode())
-        
+
+
+            #TODO: se não existir na BD ignora !IMPORTANTE! 
             cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
                             VALUES ((select id from sensors where name = ?), ? , ?)""",
                         (str[4], timestamp , value))
