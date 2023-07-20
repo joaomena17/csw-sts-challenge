@@ -55,11 +55,17 @@ def main():
         room_input = "All"
 
         office_input = st.selectbox("Select office:", ["All", "Porto", "Coimbra", "Lisboa"])
-        building_input = "1"
+        building_input = "Building1"
         if office_input == "Coimbra":
-            building_input = st.selectbox("Select building:", ["All","1","2","3"])
-        if office_input != "All" and building_input != "All":
-            room_input = st.selectbox("Select room:", ["All","1","2","3"])
+            building_input = st.selectbox("Select building:", ["All","Building1","Building2","Building3"])
+        else: building_input = "All"
+
+        if office_input == "Porto" or office_input == "Lisboa" or office_input == "Coimbra" and building_input != "All":
+            room_input = st.selectbox("Select room:", ["All", "Building","Room1","Room2","Room3"])
+        
+        if office_input == "Porto" or office_input == "Lisboa" and room_input != "All":
+            building_input = "Building1"
+
 
         st.text("")
         search_button = st.button("Search now")
