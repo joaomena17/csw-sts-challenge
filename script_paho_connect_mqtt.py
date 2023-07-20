@@ -25,21 +25,9 @@ def on_message(client, userdata, msg):
         conn = sqlite3.connect("sensors.db", check_same_thread=False)
         cursor = conn.cursor()
 
-        # Insere a informação do sensor na tabela 'sensors' se o sensor ainda não estiver na tabela
-        cursor.execute("""
-            INSERT OR IGNORE INTO sensors (id, name, type, office, building, room, units)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (data['sensor_id'], data['sensor_name'], data['sensor_type'], data['office'], data['building'], data['room'], data['units']))
-
- 
-
-        # Insere os valores do sensor na tabela 'sensor_values'
-        cursor.execute("""
-            INSERT INTO sensor_values (sensor, timestamp, value)
-            VALUES (?, ?, ?)
-        """, (data['sensor_id'], data['timestamp'], data['value']))
-
- 
+        #através da msg topic, ir buscar o id associado aos vários campos
+        #depois ir à tabela dos sensor_values e inserir uma linha com:
+        # id anterior(sensor) | timestamp | value (conteudo da mensagem -> msg.payload.decode())
 
         conn.commit()
 
