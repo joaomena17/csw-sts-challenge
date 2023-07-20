@@ -132,7 +132,7 @@ def main():
     office_occupants=0
     room_occupants=0
     # initialize timers
-    #change_occupants(office_occupants,room_occupants)
+    change_occupants(office_occupants,room_occupants)
     #change_temperature()
     temperature_init = time()
     occupants_init = time()
@@ -147,7 +147,7 @@ def main():
     while status is True:
         # save current time and check all timers
         curr_time = time()
-        #tirar depois teste
+        
         """
         print(    
             f"temperature: {int(temperature_init + (temperature_timeout) - curr_time)}\n"
