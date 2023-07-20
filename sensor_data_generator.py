@@ -19,8 +19,8 @@ ROOM_CAPACITY = 10
 client = mqtt.Client(client_id="meu_cliente")
 
 #Sensor/publisher subscription
-client.subscribe("sensores/temperatura", qos=1) # 1: at least once
-client.subscribe("SummerCampSTS/+/+/sensores/presenca", qos=1) # 1: at least once
+client.subscribe("SummerCampSTS/+/+/+/sensores/temperatura", qos=1) # 1: at least once
+client.subscribe("SummerCampSTS/+/+/+/sensores/presenca", qos=1) # 1: at least once
 
 #Sensor unsubscription
 #client.unsubscribe("sensores/temperatura") 
@@ -53,7 +53,7 @@ def interval_generator():
 def change_temperature():
     temp = temperature_generator()
     client.publish("sensores/temperatura",temp) 
-
+    client.publish("SummerCampSTS/+/+/+/sensores/temperatura",temp) ##? 
 
 # updates the event with a different occupants value
 def change_occupants():
