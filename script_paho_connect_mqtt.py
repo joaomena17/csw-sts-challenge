@@ -25,10 +25,19 @@ def on_message(client, userdata, msg):
     print("Nova mensagem recebida no tópico: " + msg.topic)
     print("Conteúdo da mensagem: " + msg.payload.decode())
     
+    try:
+        conn = sqlite3.connect("sensors.db", check_same_thread=False)
+        cursor = conn.cursor()
+
+        #ver se a database existe, se nao existir criar/inserrir
+        #ver msg 
+
+    finally:
+        cursor.close()
+        conn.close()
+        
     #insert database
-    #cria cursor
-    #disconnect do cursor
-    #disconnect do connection
+    
 
 client.on_message = on_message
 
@@ -42,9 +51,6 @@ def initialize_db():
         conn = sqlite3.connect("sensors.db", check_same_thread=False)
 
         cursor = conn.cursor()
-
-
-
 
         cursor.execute(""" SELECT count(name) FROM sqlite_master WHERE type='table' AND name='sensors' """)
 
@@ -89,7 +95,6 @@ def initialize_db():
                 "timestamp" TEXT,
 
                 "value" REAL
-
               )
 
             """)
@@ -101,8 +106,5 @@ def initialize_db():
         cursor.close()
 
         conn.close()
-
-
-
 
 initialize_db()
