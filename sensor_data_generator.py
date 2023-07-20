@@ -16,7 +16,7 @@ ROOM_LIST = ["Room1","Room2", "Room3", "Building"]
 
 OFFICE_MAX_CAPACITY = 300
 ROOM_CAPACITY = 20
-
+status = True
 
 client = mqtt.Client(client_id="meu_cliente")
 
@@ -33,11 +33,11 @@ client.subscribe("sensores/presenca", qos=1) # 1: at least once
 ######## Random values generator ########
 def temperature_generator():
     i = random.randint(1, 100)
-    if i < 5:
-        return random.randint(700, 750)  # simulate high temperature
-    elif i > 95:
-        return random.randint(751, 800)  # simulate very high temperature
-    return random.randint(600, 699)  # standard temperature
+    if i < 50:
+        return random.randint(15, 20)  # simulate high temperature
+    elif i > 90:
+        return random.randint(30, 35)  # simulate very high temperature
+    return random.randint(20, 30)  # standard temperature
 
 def office_generator():
     i = random.randint(0, 5)
@@ -56,16 +56,18 @@ def room_and_occupants_generator(curr_office_occupants, curr_room_occupants):
     cur_room = ROOM_LIST[i]
     
     if (cur_room == "Building"):           
-        if curr_office_occupants < OFFICE_MAX_CAPACITY:
-            #j = random.randint(1, OFFICE_MAX_CAPACITY)  
+        if curr_office_occupants < OFFICE_MAX_CAPACITY:        
             curr_office_occupants = curr_office_occupants + random.randint(1, min(10, OFFICE_MAX_CAPACITY - curr_office_occupants))            
     else: 
-       # j = random.randint(1, 4)
-        curr_room_occupants = curr_room_occupants + random.randint(1, min(2, ROOM_CAPACITY - curr_room_occupants))
-           
+        #curr_room_occupants = curr_room_occupants + random.randint(1, min(2, ROOM_CAPACITY - curr_room_occupants))
+        curr_room_occupants = curr_room_occupants + random.randint(1, min(10, ROOM_CAPACITY - curr_room_occupants))   
     return cur_room, curr_office_occupants,curr_room_occupants
-    
 
+def room_temp_generator() :
+    i = random.randint(0, 3)
+    cur_room = ROOM_LIST[i]
+    
+    return cur_room
 """
 def occupants_generator(curr_occupants):
     if curr_occupants < OFFICE_MAX_CAPACITY:
@@ -80,9 +82,17 @@ def interval_generator():
 
 # updates the event with a different temperature value
 def change_temperature():
+    office = office_generator()
+    building = building_generator()
+    room = room_temp_generator()
+    
     temp = temperature_generator()
-    client.publish("sensores/temperatura",temp) 
-    client.publish("SummerCampSTS/+/+/+/sensores/temperatura",temp) ##? 
+    
+    print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), temp)
+    client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), temp)
+    
+    #client.publish("sensores/temperatura",temp) 
+   
 
 # updates the event with a different occupants value
 def change_occupants(office_occupants,room_occupants):
@@ -98,8 +108,8 @@ def change_occupants(office_occupants,room_occupants):
     else:
         occupants = room_occupants
    
-    print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), occupants)
-    client.publish("sensores/presenca", office_occupants) 
+    print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(office,building,room), occupants)
+    #client.publish("sensores/presenca", office_occupants) 
     client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), occupants)
     
 ########end Random values generator########
@@ -113,7 +123,7 @@ def main():
 
     '''
     #train_event = start_event()
-    status = True
+   # status = True
     
     if status == 0:
         print("Exiting program due to post request error.\n")
@@ -122,7 +132,8 @@ def main():
     office_occupants=0
     room_occupants=0
     # initialize timers
-    
+    change_occupants(office_occupants,room_occupants)
+    #change_temperature()
     temperature_init = time()
     occupants_init = time()
 
@@ -130,20 +141,18 @@ def main():
     temperature_timeout = interval_generator()
 
     # initialize speedup factor
-    speedup_factor = 1
+    #speedup_factor = 1
 
     # continuously change values based on probabilities and time intervals, and consequent post request
     while status is True:
         # save current time and check all timers
         curr_time = time()
-        #tirar depois teste
+        
         """
         print(    
             f"temperature: {int(temperature_init + (temperature_timeout) - curr_time)}\n"
-            f"passenger: {int(occupants_init + (occupants_timeout) - curr_time)}\n")
-       
-       """
-
+            f"passenger: {int(occupants_init + (occupants_timeout) - curr_time)}\n")     
+        """
         if curr_time > temperature_init + (temperature_timeout):
             change_temperature()
             temperature_init = curr_time
@@ -167,7 +176,7 @@ def main():
         return 1
     """
     # program ran correctly
-    print()
+    #print()
     return 0
 
 
