@@ -1,12 +1,8 @@
 import streamlit as st
 import requests as r
-<<<<<<< HEAD
 from streamlit_option_menu import option_menu
 from PIL import Image
          
-def get_sensor_data_by_id(sensor_id):
-    r.get(f"http://localhost:5000/sensors/{sensor_id}")
-
 def main():
     #st.markdown("[!(csw.png)](www.criticalsoftware.com)")
     title, logo = st.columns([0.9,0.1])
@@ -86,12 +82,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-=======
-
-def get_sensor_data(city, room):
-    response = r.get(f"http://localhost:5000/sensors/{city}/{room}")
-    data = response.json()
-    st.write(data)
-
-get_sensor_data("Porto", "Room 1")
->>>>>>> 1c88e7e509c0f0794edc8cd21fe6fd190a397437

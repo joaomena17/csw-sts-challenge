@@ -59,3 +59,8 @@ query_by_room = """
                 ) AS val 
                 ON s.id = val.sensor
                 """
+
+query_insert_sensor = """
+                        INSERT INTO sensors (name, type, office, building, room, units) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                      """
