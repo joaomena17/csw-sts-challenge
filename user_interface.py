@@ -55,16 +55,16 @@ def main():
         room_input = "All"
 
         office_input = st.selectbox("Select office:", ["All", "Porto", "Coimbra", "Lisboa"])
-        building_input = "Building1"
+        building_input = "Building 1"
         if office_input == "Coimbra":
-            building_input = st.selectbox("Select building:", ["All","Building1","Building2","Building3"])
+            building_input = st.selectbox("Select building:", ["All","Building 1","Building 2","Building 3"])
         else: building_input = "All"
 
         if office_input == "Porto" or office_input == "Lisboa" or office_input == "Coimbra" and building_input != "All":
-            room_input = st.selectbox("Select room:", ["All", "Building","Room1","Room2","Room3"])
+            room_input = st.selectbox("Select room:", ["All", "Building","Room 1","Room 2","Room 3"])
         
         if office_input == "Porto" or office_input == "Lisboa" and room_input != "All":
-            building_input = "Building1"
+            building_input = "Building 1"
 
 
         st.text("")
@@ -81,6 +81,7 @@ def main():
                 filter_data = response.json()
             elif office_input != "All" and building_input != "All" and room_input != "All":
                 response = r.get(f"http://localhost:5000/sensors/{office_input}/{building_input}/{room_input}")
+                print(f"http://localhost:5000/sensors/{office_input}/{building_input}/{room_input}")
                 filter_data = response.json()
             st.dataframe(filter_data)
         st.markdown("***")
@@ -119,7 +120,7 @@ def main():
     
     if selected == ' Add Sensor':
         st.write("### Add Sensor")
-        st.write("Fill the following fields to add a new sensor to the MQTT Broker.")
+        st.write("Fill the following fields to configure a new sensor to be monitored")
         st.text("")
         new_name = st.text_input("Sensor Name", value="")
         new_office = st.text_input("Office Location", value="")
@@ -127,6 +128,16 @@ def main():
         new_room = st.text_input("Room", value="")
         new_type = st.text_input("Sensor Type", value="")
         new_unit = st.text_input("Measuring Unit", value="")
+
+        new_sensor = {
+                        "name": f"{new_name}",
+                        "office": f"{new_office}",
+                        "building": f"{new_building}",
+                        "room": f"{new_room}",
+                        "type": f"{new_type}",
+                        "units": f"{new_unit}"
+                      }
+        response = r.post("http://localhost:5000/nlquery", json=new_sensor)
         st.text("")
 
         add_sensor = st.button("Add Sensor")
