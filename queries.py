@@ -81,3 +81,7 @@ query_insert_sensor = """
                         INSERT INTO sensors (name, type, office, building, room, units) 
                         VALUES (?, ?, ?, ?, ?, ?)
                       """
+
+query_by_name = """
+                SELECT * FROM sensors WHERE name = ?
+                """

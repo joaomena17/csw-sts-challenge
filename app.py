@@ -9,10 +9,13 @@ def execute_query(query, params=()):
     with sqlite3.connect('sensors.db', check_same_thread = False) as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute(query, params)
-            rows = cursor.fetchall()
-            columns = [description[0] for description in cursor.description]
-            return [dict(zip(columns, row)) for row in rows]
+            if query.lstrip().upper().startswith('SELECT'):
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+                columns = [description[0] for description in cursor.description]
+                return [dict(zip(columns, row)) for row in rows]
+            else: # Delete Insert Update  
+                return {"message": "Not allowed to modify the database"}, 403
         except sqlite3.Error as e:
             print(f"Database error: {e}")
             return {"message": "Internal server error"}, 500
@@ -75,30 +78,25 @@ def get_all_sensor():
         return make_response(data)
         
     elif request.method == 'POST':
-        
         data = request.get_json()
-        
-        conn = sqlite3.connect('sensors.db', check_same_thread = False)
-        cursor = conn.cursor()
+        fields = ['name', 'type', 'office', 'building', 'room', 'units']
 
-        sensor_name = data['name']
-        sensor_type = data['type']
-        sensor_office = data['office']
-        sensor_building = data['building']
-        sensor_room = data['room']
-        sensor_units = data['units']
+        missing_fields = [field for field in fields if field not in data]
+        if missing_fields:
+            return jsonify({"message": f"Missing required fields: {', '.join(missing_fields)}"}), 400
 
-        #handle if exest sensore with the same name:
-        cursor.execute("SELECT * FROM sensors WHERE name = ?", (sensor_name,))
-        rows = cursor.fetchall()
-        if(len(rows) != 0):
-            return jsonify({"message": "Exist sensor with the same name"}), 409 
-        
-        cursor.execute(queries.query_insert_sensor, (sensor_name, sensor_type, sensor_office, sensor_building, sensor_room, sensor_units))
-        conn.commit()
-        conn.close()
+        with sqlite3.connect('sensors.db', check_same_thread = False) as conn:
+            cursor = conn.cursor()
 
-        return jsonify({"message": "Sensor data successfully inserted."}), 200
+            cursor.execute(queries.query_by_name, (data['name'],))
+            rows = cursor.fetchall()
+            if rows:
+                return jsonify({"message": "Exist sensor with the same name"}), 409 
+
+            cursor.execute(queries.query_insert_sensor, (data['name'], data['type'], data['office'], data['building'], data['room'], data['units']))
+            conn.commit()
+
+        return jsonify({"message": "Added new sensor successfully"}), 200
 
 
 if __name__ == '__main__':
