@@ -16,34 +16,18 @@ ROOM_LIST = ["Room1","Room2", "Room3", "Building"]
 
 OFFICE_MAX_CAPACITY = 300
 ROOM_CAPACITY = 20
-office_occupants=0
-room_occupants=0
-temperature_init = time()
-occupants_init = time()
-
-
-# sets a cooldown interval between 1 and 6 minutes      #???
-def interval_generator():
-    return random.randint(60, 360)
-
-occupants_timeout = interval_generator()
-temperature_timeout = interval_generator()
-
-temperature_init = time()
-occupants_init = time() 
-#status = True
-curr_time = time()
 
 # MQTT Broker Configuration
 broker_adress = "test.mosquitto.org" # Broker Adress  
 broker_port = 1883 # MQTT port
+      
+# sets a cooldown interval between 1 and 6 minutes      #???
+
+def interval_generator():
+    return random.randint(60, 360)
 
 
-client = mqtt.Client(client_id="cliente_1")
 
-result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
-
-print(result)
 
 #Sensor/publisher subscription
 client.subscribe("sensores/temperatura", qos=1) # 1: at least once
@@ -65,13 +49,11 @@ def temperature_generator():
 def office_generator():
     i = random.randint(0, 5)
     cur_office = OFFICE_LIST[i]
-    #print(cur_office)
     return cur_office
 
 def building_generator():
     i = random.randint(0,1)
-    cur_building = BUILDING_LIST[i]
-    #print(cur_building)
+    cur_building = BUILDING_LIST[i]  
     return cur_building
 
 def room_and_occupants_generator(curr_office_occupants, curr_room_occupants):
@@ -99,11 +81,7 @@ def change_temperature():
     room = room_temp_generator()
     
     temp = temperature_generator()
-    
-    print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), temp)
-    client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), temp)
-    
-    #client.publish("sensores/temperatura",temp) 
+    return office,building,room,temp
    
 
 # updates the event with a different occupants value
@@ -119,25 +97,42 @@ def change_occupants(office_occupants,room_occupants):
         occupants = office_occupants
     else:
         occupants = room_occupants
-   
-    print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(office,building,room), occupants)
-    #client.publish("sensores/presenca", office_occupants) 
-    client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(office,building,room), occupants)
-
-def publisher():   
+    
+    return office,building,room,occupants
+    
+def on_connect(client, userdata, flags, rc): 
+    office_occupants=0
+    room_occupants=0
+    temperature_init = time()
+    occupants_init = time()
+    curr_time = time()
+    occupants_timeout = interval_generator()
+    temperature_timeout = interval_generator()
+    
+    
+    
     if curr_time > temperature_init + (temperature_timeout):
-        change_temperature()
+        result = change_temperature()           
+        print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
+        client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
         temperature_init = curr_time
         temperature_timeout = interval_generator()
 
     if curr_time > occupants_init + (occupants_timeout):
-        change_occupants(office_occupants,room_occupants)
+        result = change_occupants(office_occupants,room_occupants)
+        print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
+        client.publish("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
         occupants_init = curr_time
         occupants_timeout = interval_generator()
-        
-client.publisher = publisher
+ 
+
+
+client = mqtt.Client(client_id="cliente_1")
+result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
+print(result) 
+client.on_connect = on_connect       
        
-client.loop_forever()   
+#client.loop_forever()   
     
 ########end Random values generator########
 
