@@ -5,6 +5,8 @@ import sys
 #import numpy as np
 from time import time
 import random
+import threading
+import time
 #import requests
 #from pytimedinput import timedInput
 
@@ -16,6 +18,16 @@ ROOM_LIST = ["Room1","Room2", "Room3", "Building"]
 
 OFFICE_MAX_CAPACITY = 300
 ROOM_CAPACITY = 20
+connected = False
+office_occupants=0
+room_occupants=0
+timer = 10
+#temperature_init = time()
+#occupants_init = time()
+#curr_time = time()
+#occupants_timeout = interval_generator()
+#temperature_timeout = interval_generator()
+
 
 # MQTT Broker Configuration
 broker_adress = "test.mosquitto.org" # Broker Adress  
@@ -88,56 +100,85 @@ def change_occupants(office_occupants,room_occupants):
         occupants = room_occupants
     
     return office,building,room,occupants
-    
-def on_connect(client, userdata, flags, rc): 
-    office_occupants=0
-    room_occupants=0
-    temperature_init = time()
-    occupants_init = time()
-    curr_time = time()
-    occupants_timeout = interval_generator()
-    temperature_timeout = interval_generator()
-    
-    print("Conectado ao broker com resultado de conexão: " + str(rc))
-    
-    
-    if curr_time > temperature_init + (temperature_timeout):
-        result = change_temperature()           
-        print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
-        client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
-        temperature_init = curr_time
-        temperature_timeout = interval_generator()
 
-    if curr_time > occupants_init + (occupants_timeout):
-        result = change_occupants(office_occupants,room_occupants)
-        print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
-        client.publish("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
-        occupants_init = curr_time
-        occupants_timeout = interval_generator()
- 
+def connect_sensor(timer):
+    result1 = change_temperature()           
+    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
+    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
+    
+    result2 = change_occupants(office_occupants,room_occupants)
+    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
+    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
+    status_report()
+        
+def on_connect(client, userdata, flags, rc): 
+    print("Conectado ao broker com resultado de conexão: " + str(rc))
+   # connect_sensor(timer)
+   
+def status_report():
+   
+    th = threading.Timer(timer, status_report)
+    #clientThreads.append(th)
+    th.start()
+    
+    result1 = change_temperature()           
+    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
+    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
+    
+    result2 = change_occupants(office_occupants,room_occupants)
+    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
+    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
+    
+
+#client.loop_forever()
+
+def loop_test():
+    
+    #temperature_init = time()
+    #occupants_init = time()
+    #curr_time = time()
+    
+    #if curr_time > temperature_init + (temperature_timeout):
+    result1 = change_temperature()           
+    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
+    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
+    
+    result2 = change_occupants(office_occupants,room_occupants)
+    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
+    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
+        #occupants_init = curr_time
+        #occupants_timeout = interval_generator()
+
 
 client = mqtt.Client(client_id="cliente_1")
-
-
-#Sensor/publisher subscription
-#client.subscribe("sensores/temperatura", qos=1) # 1: at least once
-#client.subscribe("sensores/presenca", qos=1) # 1: at least once
-
-result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
-print(result) 
 client.on_connect = on_connect  
+result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
+print(result)  
 
-office_occupants=0
-room_occupants=0
+connect_sensor(timer)
+    
 
 
-result = change_occupants(office_occupants,room_occupants)
-print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
+#if result == 0:
+#    connected = True
+    
+#while connected:
+    #loop_test()     
+
+ 
+
+
+#office_occupants=0
+#room_occupants=0
+
+#result = change_occupants(office_occupants,room_occupants)
+#print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
 #client.publish("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
-result = change_temperature()      
-print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
+#result = change_temperature()      
+#print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
 #client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])       
-#client.loop_forever()   
+
+#client.loop_start()   
     
 ########end Random values generator########
 
