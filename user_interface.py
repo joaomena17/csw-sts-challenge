@@ -119,9 +119,8 @@ def main():
         user_query = st.text_area("Enter your request...")
         queries = [
             "Show all sensors",
-            "Show the office, building and room with the highest temperature",
-            "Show the office that has the room with the highest CO2 value",
-            "Show all electricity values"
+            "show all sensors with type electricity meter in the Lisboa office",
+            "Show the room with the highest temperature in the Porto office"
         ]
         predefined_query = st.selectbox("You can also use one of our pre-defined queries!", queries)
 
