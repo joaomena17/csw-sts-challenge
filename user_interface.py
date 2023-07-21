@@ -5,13 +5,19 @@ from PIL import Image
 
 def main():
     #st.markdown("[!(csw.png)](www.criticalsoftware.com)")
-    title, logo = st.columns([0.9,0.1])
+    title, team_logo, csw_logo = st.columns([0.9,0.1,0.1])
     with title:
         st.title("Critical Summer Camp")
         st.markdown("""
                 ## STS Challenge - **_IoT Project_**
                     """)
-    with logo:
+        
+    with team_logo:
+        team_image = Image.open("logo.png")
+        st.write("\n\n\n")
+        st.image(team_image, caption="Clone Warriors")
+
+    with csw_logo:
         image = Image.open("csw.png")
         st.write("\n\n")
         st.image(image, caption="Critical Software")
@@ -137,10 +143,18 @@ def main():
                         "type": f"{new_type}",
                         "units": f"{new_unit}"
                       }
-        response = r.post("http://localhost:5000/nlquery", json=new_sensor)
         st.text("")
 
         add_sensor = st.button("Add Sensor")
+        if add_sensor:
+            response = r.post("http://localhost:5000/sensors", json=new_sensor)
+        # TODO: green text success code 200 or sensor already exists
+            if response.status_code == 200:
+                st.write("**Sensor Registered Successfully!**")
+            elif response.status_code == 409:
+                st.write("**Sensor already exists!**")
+            else:
+                st.write("**Sensor registration failed!**")
         st.markdown("***")
 
 
