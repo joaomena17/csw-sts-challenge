@@ -26,12 +26,6 @@ broker_port = 1883 # MQTT port
 def interval_generator():
     return random.randint(60, 360)
 
-
-
-#Sensor unsubscription
-#client.unsubscribe("sensores/temperatura") 
-#client.unsubscribe("sensores/presenca") 
-
 ######## Random values generator ########
 def temperature_generator():
     i = random.randint(1, 100)
@@ -104,6 +98,7 @@ def on_connect(client, userdata, flags, rc):
     occupants_timeout = interval_generator()
     temperature_timeout = interval_generator()
     
+    print("Conectado ao broker com resultado de conexão: " + str(rc))
     
     
     if curr_time > temperature_init + (temperature_timeout):
@@ -125,8 +120,8 @@ client = mqtt.Client(client_id="cliente_1")
 
 
 #Sensor/publisher subscription
-client.subscribe("sensores/temperatura", qos=1) # 1: at least once
-client.subscribe("sensores/presenca", qos=1) # 1: at least once
+#client.subscribe("sensores/temperatura", qos=1) # 1: at least once
+#client.subscribe("sensores/presenca", qos=1) # 1: at least once
 
 result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
 print(result) 
@@ -134,14 +129,15 @@ client.on_connect = on_connect
 
 office_occupants=0
 room_occupants=0
-result = change_occupants(office_occupants,room_occupants)
 
+
+result = change_occupants(office_occupants,room_occupants)
 print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
-client.publish("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
+#client.publish("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
 result = change_temperature()      
 print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
-client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])       
-client.loop_forever()   
+#client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])       
+#client.loop_forever()   
     
 ########end Random values generator########
 
