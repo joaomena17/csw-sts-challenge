@@ -24,36 +24,37 @@ def main():
     st.divider()
 
     with st.sidebar:
-        selected = option_menu("Smart Booking", ['Home', 'Search by ID', 'AI Chat', 'Book Room', ' Add Sensor'], 
-            icons=['house', 'search', 'chat', 'cloud-upload', 'plus'], menu_icon="book", default_index=0)
+        selected = option_menu("Smart Office", ['Home', 'Search by ID', 'AI Chat', ' Add Sensor'], 
+            icons=['house', 'search', 'chat', 'plus'], menu_icon="book", default_index=0)
         selected
         print(selected)
 
     # HOME
     if selected == 'Home':
 
-        st.write("### Smart Booking")
+        st.write("### Smart Office")
         st.write("Use this page to know everything that's happening in the office\n before you book a desk!")
-        st.text("")
+        #st.text("")
 
-        st.write("##### What do you want to check out?")
+        #st.write("##### What do you want to check out?")
         # insert buttons to select values
-        col1, col2, col3, col4 = st.columns(4)
-        user_params = [True, True, True, True]
-        with col1:
-            user_params[0] = st.checkbox("Temperature", value=True)
+        
+        #col1, col2, col3, col4 = st.columns(4)
+        #user_params = [True, True, True, True]
+        #with col1:
+        #    user_params[0] = st.checkbox("Temperature", value=True)
 
-        with col2:
-            user_params[1] = st.checkbox("CO2", value=True)
+        #with col2:
+        #    user_params[1] = st.checkbox("CO2", value=True)
 
-        with col3:
-            user_params[2] = st.checkbox("Noise", value=True)
+        #with col3:
+        #    user_params[2] = st.checkbox("Water", value=True)
 
-        with col4:
-            user_params[3] = st.checkbox("Empty seats", value=True)
+        #with col4:
+        #    user_params[3] = st.checkbox("Gas", value=True)
 
 
-        st.markdown("***")
+        #st.markdown("***")
         st.write("##### Where do you want to check?")
         
         office_input  = "All"
@@ -77,7 +78,7 @@ def main():
         search_button = st.button("Search now")
         if search_button:
             if office_input == "All":
-                response = r.get(f"http://localhost:5000/sensors/")
+                response = r.get(f"http://localhost:5000/sensors")
                 filter_data = response.json()
             elif office_input != "All" and building_input == "All":
                 response = r.get(f"http://localhost:5000/sensors/{office_input}")
@@ -89,7 +90,10 @@ def main():
                 response = r.get(f"http://localhost:5000/sensors/{office_input}/{building_input}/{room_input}")
                 print(f"http://localhost:5000/sensors/{office_input}/{building_input}/{room_input}")
                 filter_data = response.json()
-            st.dataframe(filter_data)
+            if not filter_data:
+                st.write("**No sensor found!**")
+            else:
+                st.dataframe(filter_data)
         st.markdown("***")
 
     # SEARCH BY ID
@@ -102,31 +106,54 @@ def main():
         if id_search:
             response = r.get(f"http://localhost:5000/sensors/{sensor_id}")
             sensor_data = response.json()
-            st.dataframe(sensor_data)
+            if not sensor_data:
+                st.write("**Sensor not found!**")
+            else:
+                st.dataframe(sensor_data)
         st.markdown("***")
 
     if selected == 'AI Chat':
-        st.write("# WORK IN PROGRESS")
+        st.write("### Smart Assistant")
+        st.write("Ask our intelligent smart assistant what you want to know and he will find that information for you.")
+        user_query = st.text_area("Enter your request...")
+        queries = [
+            "What is the temperature at room 3 of the Porto office",
+            "Which office building has the highest temperature?",
+            "Are there any rooms in Coimbra with a CO2 level over 700?",
+            "What is the value for the electricity in the building of the Lisbon office?"
+        ]
+        predefined_query = st.selectbox("You can also use one of our pre-defined queries!", queries)
 
-    if selected == 'Book Room':
-        st.write("### Book Room")
-        st.write("Select the room you want to book and check if it's available.")
-        st.text("")
-        book_office = st.radio("Office", ["Porto", "Coimbra", "Lisboa"])
-        if book_office == "Coimbra":
-            book_building = st.radio("Building", ["A", "B", "C"])
+        if len(user_query) == 0:
+            query_request = { "text": f"{predefined_query}"}
         else:
-            book_building = "A"
-        book_room = st.radio("Room", ["Room1", "Room2", "Room3"])
-        st.button("Check Availability")
-        st.markdown("***")
+            query_request = { "text": f"{user_query}"}
+        
+        ai_button = st.button("Search now")
+        if ai_button:
+            response = r.post("http://localhost:5000/nlquery", json=query_request)
+            if response.status_code == 200:
+                st.dataframe(response.json())
+            elif response.status_code != 200:
+                st.write(response.json()["message"])
+            else:
+                st.write("Something went wrong...")
+
+    # if selected == 'Book Room':message
+    #    book_office = st.radio("Office", ["Porto", "Coimbra", "Lisboa"])
+    #    if book_office == "Coimbra":message
+    #    else:
+    #        book_building = "A"
+    #    book_room = st.radio("Room", ["Room1", "Room2", "Room3"])
+    #    st.button("Check Availability")
+    #    st.markdown("***")
 
         # Pie Chart
         # hyperlink to Pulsar
     
     if selected == ' Add Sensor':
         st.write("### Add Sensor")
-        st.write("Fill the following fields to configure a new sensor to be monitored")
+        st.write("Fill the following fields to config<span style='color:green'>ure a new sensor to be monitored")
         st.text("")
         new_name = st.text_input("Sensor Name", value="")
         new_office = st.text_input("Office Location", value="")
@@ -147,14 +174,19 @@ def main():
 
         add_sensor = st.button("Add Sensor")
         if add_sensor:
+            print(new_sensor)
             response = r.post("http://localhost:5000/sensors", json=new_sensor)
         # TODO: green text success code 200 or sensor already exists
             if response.status_code == 200:
-                st.write("**Sensor Registered Successfully!**")
+                st.write("<span style='color:green'>Sensor Registered Successfully!</span>",
+                          unsafe_allow_html=True)
             elif response.status_code == 409:
                 st.write("**Sensor already exists!**")
+            elif response.status_code == 400:
+                st.write(response.json()["message"])
             else:
-                st.write("**Sensor registration failed!**")
+                st.write("<span style='color:red'>Sensor registration failed!</span>",
+                          unsafe_allow_html=True)
         st.markdown("***")
 
 

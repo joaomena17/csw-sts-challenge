@@ -81,9 +81,10 @@ def get_all_sensor():
         data = request.get_json()
         fields = ['name', 'type', 'office', 'building', 'room', 'units']
 
-        missing_fields = [field for field in fields if field not in data]
-        if missing_fields:
-            return jsonify({"message": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+        missing_fields = [field for field in fields if field not in data or len(field) == 0]
+        print(missing_fields)
+        if len(missing_fields) == 0:
+            return jsonify({"message": f"Missing required fields. {', '.join(missing_fields)}"}), 400
 
         with sqlite3.connect('sensors.db', check_same_thread = False) as conn:
             cursor = conn.cursor()
