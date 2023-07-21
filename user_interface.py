@@ -1,3 +1,4 @@
+from webbrowser import get
 import streamlit as st
 import requests as r
 from streamlit_option_menu import option_menu
