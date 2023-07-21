@@ -28,11 +28,6 @@ def interval_generator():
 
 
 
-
-#Sensor/publisher subscription
-client.subscribe("sensores/temperatura", qos=1) # 1: at least once
-client.subscribe("sensores/presenca", qos=1) # 1: at least once
-
 #Sensor unsubscription
 #client.unsubscribe("sensores/temperatura") 
 #client.unsubscribe("sensores/presenca") 
@@ -126,8 +121,13 @@ def on_connect(client, userdata, flags, rc):
         occupants_timeout = interval_generator()
  
 
-
 client = mqtt.Client(client_id="cliente_1")
+
+
+#Sensor/publisher subscription
+client.subscribe("sensores/temperatura", qos=1) # 1: at least once
+client.subscribe("sensores/presenca", qos=1) # 1: at least once
+
 result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
 print(result) 
 client.on_connect = on_connect       
