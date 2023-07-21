@@ -43,13 +43,30 @@ query_by_city = """
                 ON s.id = val.sensor
                 """
 
+query_by_building = """
+                    SELECT office, building, room, name, type, recent_value AS value
+                    FROM 
+                    (
+                        SELECT * 
+                        FROM sensors
+                        WHERE office = ? AND building = ?
+                    ) AS s
+                    JOIN
+                    (    
+                        SELECT sensor, MAX(timestamp) AS recent_value
+                        FROM sensor_values
+                        GROUP BY sensor
+                    ) AS val 
+                    ON s.id = val.sensor
+                    """
+
 query_by_room = """
                 SELECT office, building, room, name, type, recent_value AS value
                 FROM 
                 (
                     SELECT * 
                     FROM sensors
-                    WHERE office = ? AND room = ?
+                    WHERE office = ? AND building = ? AND room = ?
                 ) AS s
                 JOIN
                 (    
