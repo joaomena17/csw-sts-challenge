@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 import sqlite3
 import queries
+import gpt_integration as gpt
 
 app = Flask(__name__)
 
@@ -51,6 +52,21 @@ def get_all_sensor_room(city, building, room):
     return make_response(data)
 
 
+#Get info by netural language query 
+@app.route('/nlquery', methods = ['POST'])
+def get_nlquery():
+    data = request.get_json()
+
+    if 'text' not in data:
+        return jsonify({"message": "'text' field is required"}), 400
+    
+    text = data['text']
+    query = gpt.generate_sql_query(text)
+
+    data = execute_query(query)
+    return make_response(data)
+
+
 #Get all sensors recent values 
 @app.route('/sensors', methods = ['GET', 'POST'])
 def get_all_sensor():
@@ -78,7 +94,6 @@ def get_all_sensor():
         if(len(rows) != 0):
             return jsonify({"message": "Exist sensor with the same name"}), 409 
         
-
         cursor.execute(queries.query_insert_sensor, (sensor_name, sensor_type, sensor_office, sensor_building, sensor_room, sensor_units))
         conn.commit()
         conn.close()
