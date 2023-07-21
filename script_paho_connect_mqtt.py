@@ -41,17 +41,16 @@ def on_message(client, userdata, msg):
             #TODO: se não existir na BD ignora !IMPORTANTE! 
 
             # Retrieve the id of the sensor
-
             cursor.execute("""
                            SELECT id
                            FROM sensors
                            WHERE name = ?""", (str[4],)
                            )
             
-            result = cursor.fetchone()
+            result = cursor.fetchone() # fetchone devolve o resultado da Query
             test = result[0]
 
-            if result.length > 0:
+            if test > 0:
 
             #  cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
             #                 VALUES ((select id from sensors where name = ?), ? , ?)""",
