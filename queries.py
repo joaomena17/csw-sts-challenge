@@ -14,20 +14,22 @@ query_by_sensor_id = """
                     """
 
 query_all_sensors = """
-                    SELECT office, building, room, name, type, recent_value AS value
+                    SELECT s.office, s.building, s.room, s.name, s.type, sv.value AS recent_value
                     FROM 
                         sensors AS s
-                    JOIN
-                    (    
-                        SELECT sensor, MAX(timestamp) AS recent_value
-                        FROM sensor_values
+                    JOIN (
+                        SELECT sensor, MAX(timestamp) AS max_timestamp
+                        FROM  sensor_values
                         GROUP BY sensor
-                    )AS val 
-                    ON s.id = val.sensor
+                    ) AS max_val
+                    ON s.id = max_val.sensor
+                    JOIN
+                        sensor_values AS sv
+                    ON sv.sensor = max_val.sensor AND sv.timestamp = max_val.max_timestamp
                     """
 
 query_by_city = """
-                SELECT office, building, room, name, type, recent_value AS value
+                SELECT s.office, s.building, s.room, s.name, s.type, sv.value AS recent_value
                 FROM 
                 (
                     SELECT * 
@@ -35,16 +37,19 @@ query_by_city = """
                     WHERE office = ?
                 ) AS s
                 JOIN
-                (    
-                    SELECT sensor, MAX(timestamp) AS recent_value
+                (
+                    SELECT sensor, MAX(timestamp) AS max_timestamp
                     FROM sensor_values
                     GROUP BY sensor
-                ) AS val 
-                ON s.id = val.sensor
+                ) AS max_val
+                ON s.id = max_val.sensor
+                JOIN 
+                    sensor_values AS sv
+                ON sv.sensor = max_val.sensor AND sv.timestamp = max_val.max_timestamp
                 """
 
 query_by_building = """
-                    SELECT office, building, room, name, type, recent_value AS value
+                    SELECT s.office, s.building, s.room, s.name, s.type, sv.value AS recent_value
                     FROM 
                     (
                         SELECT * 
@@ -52,16 +57,19 @@ query_by_building = """
                         WHERE office = ? AND building = ?
                     ) AS s
                     JOIN
-                    (    
-                        SELECT sensor, MAX(timestamp) AS recent_value
+                    (
+                        SELECT sensor, MAX(timestamp) AS max_timestamp
                         FROM sensor_values
                         GROUP BY sensor
-                    ) AS val 
-                    ON s.id = val.sensor
+                    ) AS max_val
+                    ON s.id = max_val.sensor
+                    JOIN
+                        sensor_values AS sv
+                    ON sv.sensor = max_val.sensor AND sv.timestamp = max_val.max_timestamp
                     """
 
 query_by_room = """
-                SELECT office, building, room, name, type, recent_value AS value
+                SELECT s.office, s.building, s.room, s.name, s.type, sv.value AS recent_value
                 FROM 
                 (
                     SELECT * 
@@ -69,12 +77,15 @@ query_by_room = """
                     WHERE office = ? AND building = ? AND room = ?
                 ) AS s
                 JOIN
-                (    
-                    SELECT sensor, MAX(timestamp) AS recent_value
+                (
+                    SELECT sensor, MAX(timestamp) AS max_timestamp
                     FROM sensor_values
                     GROUP BY sensor
-                ) AS val 
-                ON s.id = val.sensor
+                ) AS max_val
+                ON s.id = max_val.sensor
+                JOIN
+                    sensor_values AS sv
+                ON sv.sensor = max_val.sensor AND sv.timestamp = max_val.max_timestamp
                 """
 
 query_insert_sensor = """
