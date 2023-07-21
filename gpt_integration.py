@@ -2,7 +2,7 @@ import openai
 import sqlite3
 import os
 
-openai.api_key = os.getenv("OPEN_API_KEY")
+openai.api_key = os.getenv("OPEN_AI_KEY")
 
 sensors_columns = [
     "id",

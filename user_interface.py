@@ -6,6 +6,7 @@ from PIL import Image
 
 def main():
     #st.markdown("[!(csw.png)](www.criticalsoftware.com)")
+    st.set_page_config("IoT Challenge", page_icon="logo.png")
     title, team_logo, csw_logo = st.columns([0.9,0.1,0.1])
     with title:
         st.title("Critical Summer Camp")
