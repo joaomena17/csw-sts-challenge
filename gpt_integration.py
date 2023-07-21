@@ -1,7 +1,7 @@
 import openai
 import sqlite3
 
-openai.api_key = "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"
+openai.api_key = "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"
 
 sensors_columns = [
     "id",
