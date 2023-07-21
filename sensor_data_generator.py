@@ -22,19 +22,12 @@ connected = False
 office_occupants=0
 room_occupants=0
 timer = 1
-#temperature_init = time()
-#occupants_init = time()
-#curr_time = time()
-#occupants_timeout = interval_generator()
-#temperature_timeout = interval_generator()
-
 
 # MQTT Broker Configuration
 broker_adress = "test.mosquitto.org" # Broker Adress  
 broker_port = 1883 # MQTT port
       
-# sets a cooldown interval between 1 and 6 minutes      #???
-
+# sets a cooldown interval between 1 and 6 minutes      
 def interval_generator():
     return random.randint(60, 360)
 
@@ -103,22 +96,21 @@ def change_occupants(office_occupants,room_occupants):
 
 def connect_sensor(timer):
     result1 = change_temperature()           
-    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
+    #print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
     client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
     
     result2 = change_occupants(office_occupants,room_occupants)
-    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
+    #print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
     client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
     status_report()
         
 def on_connect(client, userdata, flags, rc): 
     print("Conectado ao broker com resultado de conexão: " + str(rc))
-   # connect_sensor(timer)
+
    
 def status_report():
    
     th = threading.Timer(timer, status_report)
-    #clientThreads.append(th)
     th.start()
     
     result1 = change_temperature()           
@@ -129,27 +121,6 @@ def status_report():
     print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
     client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
     
-
-#client.loop_forever()
-
-def loop_test():
-    
-    #temperature_init = time()
-    #occupants_init = time()
-    #curr_time = time()
-    
-    #if curr_time > temperature_init + (temperature_timeout):
-    result1 = change_temperature()           
-    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
-    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/temperatura".format(result1[0],result1[1],result1[2],result1[2]), result1[3])
-    
-    result2 = change_occupants(office_occupants,room_occupants)
-    print ("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
-    client.publish("SummerCampSTS/{}/{}/{}/CW_{}_sensores/presenca".format(result2[0],result2[1],result2[2],result2[2]), result2[3])
-        #occupants_init = curr_time
-        #occupants_timeout = interval_generator()
-
-
 client = mqtt.Client(client_id="cliente_1")
 client.on_connect = on_connect  
 result = client.connect(broker_adress, broker_port) # Connects MQTT client to a MQTT Broker
@@ -157,94 +128,3 @@ print(result)
 
 connect_sensor(timer)
     
-
-
-#if result == 0:
-#    connected = True
-    
-#while connected:
-    #loop_test()     
-
- 
-
-
-#office_occupants=0
-#room_occupants=0
-
-#result = change_occupants(office_occupants,room_occupants)
-#print ("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
-#client.publish("SummerCampSTS/{}/{}/{}/sensores/presenca".format(result[0],result[1],result[2]), result[3])
-#result = change_temperature()      
-#print ("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])
-#client.publish("SummerCampSTS/{}/{}/{}/sensores/temperatura".format(result[0],result[1],result[2]), result[3])       
-
-#client.loop_start()   
-    
-########end Random values generator########
-
-
-"""
-def main():
-    '''
-    # start trip
-    s = input("Enter any input to start trip.\n")
-    if s is None or s == "stop":
-        sys.exit("Canceled start")
-
-    '''
-    #train_event = start_event()
-   # status = True
-    
-    if status == 0:
-        print("Exiting program due to post request error.\n")
-        return 1
-
-    office_occupants=0
-    room_occupants=0
-    # initialize timers
-    #change_occupants(office_occupants,room_occupants)
-    #change_temperature()
-    temperature_init = time()
-    occupants_init = time()
-
-    occupants_timeout = interval_generator()
-    temperature_timeout = interval_generator()
-
-    # initialize speedup factor
-    #speedup_factor = 1
-
-    # continuously change values based on probabilities and time intervals, and consequent post request
-    while status is True:
-        # save current time and check all timers
-        curr_time = time()
-               
-        """
-       
-        #print(    
-        #    f"temperature: {int(temperature_init + (temperature_timeout) - curr_time)}\n"
-        #    f"passenger: {int(occupants_init + (occupants_timeout) - curr_time)}\n")     
-        #"""
-        #if curr_time > temperature_init + (temperature_timeout):
-        #    change_temperature()
-        #    temperature_init = curr_time
-        #    temperature_timeout = interval_generator()
-#
-        #if curr_time > occupants_init + (occupants_timeout):
-        #    change_occupants(office_occupants,room_occupants)
-        #    occupants_init = curr_time
-        #    occupants_timeout = interval_generator()
-       
-       # status = publish_event(train_event)
-      
-
-   # status = publish_event(train_event)
-   
-    # program ran correctly
-    #print()
-    # return 0
-
-
-##    main()
-   
-   
-   
