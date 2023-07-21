@@ -48,17 +48,15 @@ def on_message(client, userdata, msg):
                            )
             
             result = cursor.fetchone() # fetchone devolve o resultado da Query
-            test = result[0]
-
-            if test > 0:
-
-            #  cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
+            if result != None and isinstance(result[0], int):
+        
+            #cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
             #                 VALUES ((select id from sensors where name = ?), ? , ?)""",
             #            (str[4], timestamp , value))
 
                 cursor.execute("""INSERT INTO sensor_values (sensor, timestamp, value)
                             VALUES (?, ? , ?)""",
-                        (test, timestamp , value))
+                        (result[0], timestamp , value))
               
             else:
                 print("Sensor: ", str[4]," not found")
