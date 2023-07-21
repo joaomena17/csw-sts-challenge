@@ -118,10 +118,10 @@ def main():
         st.write("Ask our intelligent smart assistant what you want to know and he will find that information for you.")
         user_query = st.text_area("Enter your request...")
         queries = [
-            "What is the temperature at room 3 of the Porto office",
-            "Which office building has the highest temperature?",
-            "Are there any rooms in Coimbra with a CO2 level over 700?",
-            "What is the value for the electricity in the building of the Lisbon office?"
+            "Show all sensors",
+            "Show the office, building and room with the highest temperature",
+            "Show the office that has the room with the highest CO2 value",
+            "Show all electricity values"
         ]
         predefined_query = st.selectbox("You can also use one of our pre-defined queries!", queries)
 
